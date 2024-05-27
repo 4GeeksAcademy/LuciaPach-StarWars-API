@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-#DEFINIMOS NUESTRAS TABLAS Y LAS RELACIONES ENTRE ELLAS, AÑADIENDO LOS ATRIBUTOS CORRESPONDIENTES:
+# DEFINIMOS NUESTRAS TABLAS Y LAS RELACIONES ENTRE ELLAS, AÑADIENDO LOS ATRIBUTOS CORRESPONDIENTES:
 
 class Favorites(db.Model):
     __tablename__ = 'favorites'
@@ -11,9 +11,11 @@ class Favorites(db.Model):
     characters_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
     planets_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
     starships_id = db.Column(db.Integer, db.ForeignKey('starships.id'))
-    
-   
 
+    user = db.relationship("User", backref=db.backref("favorites", lazy=True))
+    character = db.relationship("Characters", backref=db.backref("favorites", lazy=True))
+    planet = db.relationship("Planets", backref=db.backref("favorites", lazy=True))
+    starship = db.relationship("Starships", backref=db.backref("favorites", lazy=True))
 
     def __repr__(self):
         return '<Favorites %r>' % self.id
@@ -24,17 +26,15 @@ class Favorites(db.Model):
             "characters_id": self.characters_id,
             "planets_id": self.planets_id,
             "starships_id": self.starships_id,
-        
         }
-    
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(250), nullable=False)
     last_name = db.Column(db.String(250), nullable=False)
     email = db.Column(db.String(250), unique=True, nullable=False)
-    password = db.Column(db.String(250), nullable=True)
-    user_favorites = db.relationship(Favorites)
+    password = db.Column(db.String(250), nullable=False)
 
     def __repr__(self):
         return '<User %r>' % self.first_name
@@ -47,21 +47,18 @@ class User(db.Model):
             "email": self.email,
             "password": self.password
         }
-    
+
 class Characters(db.Model):
     __tablename__ = 'characters'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
-
     height = db.Column(db.Integer, nullable=False)
     mass = db.Column(db.Integer, nullable=False)
     hair_color = db.Column(db.String(250), nullable=False)
     eye_color = db.Column(db.String(250), nullable=False)
     gender = db.Column(db.String(250), nullable=False)
     birth_year = db.Column(db.String(250), nullable=False)
-    characters_favorites = db.relationship(Favorites)
 
-    
     def __repr__(self):
         return '<Characters %r>' % self.name
 
@@ -75,8 +72,6 @@ class Characters(db.Model):
             "eye_color": self.eye_color,
             "gender": self.gender,
             "birth_year": self.birth_year,
-            
-            
         }
 
 class Planets(db.Model):
@@ -88,9 +83,7 @@ class Planets(db.Model):
     orbital_period = db.Column(db.Integer, nullable=False)
     rotation_period = db.Column(db.Integer, nullable=False)
     diameter = db.Column(db.Integer, nullable=False)
-    planets_favorites = db.relationship(Favorites)
 
-    
     def __repr__(self):
         return '<Planets %r>' % self.name
 
@@ -103,9 +96,8 @@ class Planets(db.Model):
             "orbital_period": self.orbital_period,
             "rotation_period": self.rotation_period,
             "diameter": self.diameter,
-           
         }
-    
+
 class Starships(db.Model):
     __tablename__ = 'starships'
     id = db.Column(db.Integer, primary_key=True)
@@ -115,11 +107,9 @@ class Starships(db.Model):
     passengers = db.Column(db.Integer, nullable=False)
     consumables = db.Column(db.String(250), nullable=False)
     cost_in_credits = db.Column(db.Integer, nullable=False)
-    starships_favorites = db.relationship(Favorites)
 
-    
     def __repr__(self):
-        return '<Starships %r>' % self.model
+        return '<Starships %r>' % self.name
 
     def serialize(self):
         return {
@@ -131,7 +121,3 @@ class Starships(db.Model):
             "consumables": self.consumables,
             "cost_in_credits": self.cost_in_credits,
         }
-    
-
-
-
